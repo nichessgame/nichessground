@@ -1,7 +1,7 @@
 {
-  "name": "chessground",
-  "version": "9.0.2",
-  "description": "lichess.org chess ui",
+  "name": "nichessground",
+  "version": "0.0.1",
+  "description": "Nichess UI",
   "type": "module",
   "main": "dist/chessground.js",
   "types": "chessground.d.ts",
@@ -40,19 +40,17 @@
     "/assets/*.css",
     "/src/*.ts"
   ],
-  "repository": "https://github.com/lichess-org/chessground",
+  "repository": "https://github.com/nichessgame/nichessground",
   "keywords": [
-    "chess",
-    "lichess",
-    "lichess.org",
-    "chessboard",
+    "nichess",
+    "nichess.org",
     "ui",
     "typescript"
   ],
-  "author": "Thibault Duplessis (https://github.com/ornicar)",
+  "author": "Chessground: Thibault Duplessis (https://github.com/ornicar), Nichessground: vasilije2448",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/lichess-org/chessground/issues"
+    "url": "https://github.com/nichessgame/nichessground/issues"
   },
-  "funding": "https://lichess.org/patron"
+  "funding": "https://www.patreon.com/cw/nichessgame"
 }

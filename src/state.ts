@@ -1,4 +1,4 @@
-import * as fen from './fen.js';
+import * as nichess_fen from './nichess_fen.js';
 import { AnimCurrent } from './anim.js';
 import { DragCurrent } from './drag.js';
 import { Drawable } from './draw.js';
@@ -13,12 +13,13 @@ export interface HeadlessState {
   lastMove?: cg.Key[]; // squares part of the last move ["c3"; "c4"]
   selected?: cg.Key; // square currently selected "a1"
   coordinates: boolean; // include coords attributes
+  coordinatesOnSquares: boolean; // include coords attributes on every square
   ranksPosition: cg.RanksPosition; // position ranks on either side. left | right
   autoCastle: boolean; // immediately complete the castle by moving the rook after king move
   viewOnly: boolean; // don't bind events: the user will never be able to move pieces around
   disableContextMenu: boolean; // because who needs a context menu on a chessboard
   addPieceZIndex: boolean; // adds z-index values to pieces (for 3D)
-  addDimensionsCssVarsTo?: HTMLElement; // add --cg-width and --cg-height CSS vars containing the board's dimensions to this element
+  addDimensionsCssVarsTo?: HTMLElement; // add ---cg-width and ---cg-height CSS vars containing the board's dimensions to this element
   blockTouchScroll: boolean; // block scrolling via touch dragging on the board, e.g. for coordinate training
   pieceKey: boolean; // add a data-key attribute to piece elements
   trustAllEvents?: boolean; // disable checking for human only input (e.isTrusted)
@@ -109,10 +110,11 @@ export interface State extends HeadlessState {
 
 export function defaults(): HeadlessState {
   return {
-    pieces: fen.read(fen.initial),
+    pieces: nichess_fen.read("0|0-warrior-60,0-knight-60,0-assassin-10,0-mage-10,0-king-10,0-assassin-10,0-knight-60,0-warrior-60,0-pawn-30,0-pawn-30,0-pawn-30,0-pawn-30,0-pawn-30,0-pawn-30,0-pawn-30,0-pawn-30,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,1-pawn-30,1-pawn-30,1-pawn-30,1-pawn-30,1-pawn-30,1-pawn-30,1-pawn-30,1-pawn-30,1-warrior-60,1-knight-60,1-assassin-10,1-mage-10,1-king-10,1-assassin-10,1-knight-60,1-warrior-60,"),
     orientation: 'white',
     turnColor: 'white',
     coordinates: true,
+    coordinatesOnSquares: false,
     ranksPosition: 'right',
     autoCastle: true,
     viewOnly: false,
@@ -186,9 +188,9 @@ export function defaults(): HeadlessState {
           opacity: 0.35,
           lineWidth: 15,
         },
-        purple: { key: 'purp', color: '#68217a', opacity: 0.65, lineWidth: 10 },
+        purple: { key: 'purple', color: '#68217a', opacity: 0.65, lineWidth: 10 },
         pink: { key: 'pink', color: '#ee2080', opacity: 0.5, lineWidth: 10 },
-        hilite: { key: 'hilite', color: '#fff', opacity: 1, lineWidth: 1 },
+        white: { key: 'white', color: 'white', opacity: 1, lineWidth: 10 },
       },
       prevSvgHash: '',
     },

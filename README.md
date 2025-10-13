@@ -1,3 +1,9 @@
+# Nichessground
+
+This project is a fork of [https://github.com/lichess-org/chessground](https://github.com/lichess-org/chessground).
+
+# Old README
+
 # Chessground
 
 [![Continuous Integration](https://github.com/lichess-org/chessground/workflows/Continuous%20Integration/badge.svg)](https://github.com/lichess-org/chessground/actions?query=workflow%3A%22Continuous+Integration%22)

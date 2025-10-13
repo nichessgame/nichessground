@@ -36,10 +36,28 @@ export function render(s: State): void {
 
   // walk over all board dom elements, apply animations and flag moved pieces
   el = boardEl.firstChild as cg.PieceNode | cg.SquareNode | undefined;
+  // TODO: Better way to do this?
+  const bounds = s.dom.elements.wrap.getBoundingClientRect();
+  const width = (Math.floor((bounds.width * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
+  boardEl.style.cssText += `font-size: ${Math.floor(width/20)}px;`
+
   while (el) {
     k = el.cgKey;
     if (isPieceNode(el)) {
       pieceAtKey = pieces.get(k);
+      // TODO: Do this elsewhere?
+      if(pieceAtKey) {
+        let hpDiv = el.firstChild
+        if(hpDiv != null && hpDiv.firstChild) {
+          hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString()
+        } else {
+          let hpDiv2 = document.createElement("div")
+          hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
+          const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
+          hpDiv2.appendChild(hpText);
+          el.appendChild(hpDiv2)
+        }
+      }
       anim = anims.get(k);
       fading = fadings.get(k);
       elPieceName = el.cgPiece;
@@ -171,9 +189,13 @@ export function render(s: State): void {
 export function renderResized(s: State): void {
   const asWhite: boolean = whitePov(s),
     posToTranslate = posToTranslateFromBounds(s.dom.bounds());
+  const bounds = s.dom.elements.wrap.getBoundingClientRect();
+  const width = (Math.floor((bounds.width * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
   let el = s.dom.elements.board.firstChild as cg.PieceNode | cg.SquareNode | undefined;
   while (el) {
     if ((isPieceNode(el) && !el.cgAnimating) || isSquareNode(el)) {
+      // TODO: Better way to do this?
+      el.style.cssText += `font-size: ${Math.floor(width/20)}px;`
       translate(el, posToTranslate(key2pos(el.cgKey), asWhite));
     }
     el = el.nextSibling as cg.PieceNode | cg.SquareNode | undefined;
@@ -190,8 +212,8 @@ export function updateBounds(s: State): void {
   container.style.height = height + 'px';
   s.dom.bounds.clear();
 
-  s.addDimensionsCssVarsTo?.style.setProperty('--cg-width', width + 'px');
-  s.addDimensionsCssVarsTo?.style.setProperty('--cg-height', height + 'px');
+  s.addDimensionsCssVarsTo?.style.setProperty('---cg-width', width + 'px');
+  s.addDimensionsCssVarsTo?.style.setProperty('---cg-height', height + 'px');
 }
 
 const isPieceNode = (el: cg.PieceNode | cg.SquareNode): el is cg.PieceNode => el.tagName === 'PIECE';
