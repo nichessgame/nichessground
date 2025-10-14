@@ -39,23 +39,23 @@ export function render(s: State): void {
   // TODO: Better way to do this?
   const bounds = s.dom.elements.wrap.getBoundingClientRect();
   const width = (Math.floor((bounds.width * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
-  boardEl.style.cssText += `font-size: ${Math.floor(width/20)}px;`
+  boardEl.style.cssText += `font-size: ${Math.floor(width / 20)}px;`;
 
   while (el) {
     k = el.cgKey;
     if (isPieceNode(el)) {
       pieceAtKey = pieces.get(k);
       // TODO: Do this elsewhere?
-      if(pieceAtKey) {
-        const hpDiv = el.firstChild
-        if(hpDiv != null && hpDiv.firstChild) {
-          hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString()
+      if (pieceAtKey) {
+        const hpDiv = el.firstChild;
+        if (hpDiv != null && hpDiv.firstChild) {
+          hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString();
         } else {
-          const hpDiv2 = document.createElement("div")
+          const hpDiv2 = document.createElement('div');
           hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
           const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
           hpDiv2.appendChild(hpText);
-          el.appendChild(hpDiv2)
+          el.appendChild(hpDiv2);
         }
       }
       anim = anims.get(k);
@@ -195,7 +195,7 @@ export function renderResized(s: State): void {
   while (el) {
     if ((isPieceNode(el) && !el.cgAnimating) || isSquareNode(el)) {
       // TODO: Better way to do this?
-      el.style.cssText += `font-size: ${Math.floor(width/20)}px;`
+      el.style.cssText += `font-size: ${Math.floor(width / 20)}px;`;
       translate(el, posToTranslate(key2pos(el.cgKey), asWhite));
     }
     el = el.nextSibling as cg.PieceNode | cg.SquareNode | undefined;

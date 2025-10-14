@@ -9,7 +9,7 @@ export interface Piece {
   role: Role;
   color: Color;
   promoted?: boolean;
-  healthPoints:  number
+  healthPoints: number;
 }
 export interface Drop {
   role: Role;
