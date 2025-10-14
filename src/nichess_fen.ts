@@ -11,7 +11,7 @@ function squareIndexToKey(squareIndex: number): cg.Key {
   const xy = squareIndexToCoordinates(squareIndex)
   const x = xy[0]
   const y = xy[1]
-  const file = ""
+  let file = ""
   switch (x) {
     case 1:
       file = 'a'
