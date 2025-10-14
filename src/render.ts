@@ -47,11 +47,11 @@ export function render(s: State): void {
       pieceAtKey = pieces.get(k);
       // TODO: Do this elsewhere?
       if(pieceAtKey) {
-        let hpDiv = el.firstChild
+        const hpDiv = el.firstChild
         if(hpDiv != null && hpDiv.firstChild) {
           hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString()
         } else {
-          let hpDiv2 = document.createElement("div")
+          const hpDiv2 = document.createElement("div")
           hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
           const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
           hpDiv2.appendChild(hpText);
