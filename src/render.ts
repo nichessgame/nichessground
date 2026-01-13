@@ -176,6 +176,15 @@ export function render(s: State): void {
 
         if (s.addPieceZIndex) pieceNode.style.zIndex = posZIndex(pos, asWhite);
 
+        // Add health points div to newly created pieces
+        if (p.healthPoints !== undefined) {
+          const hpDiv = document.createElement('div');
+          hpDiv.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
+          const hpText = document.createTextNode(p.healthPoints.toString());
+          hpDiv.appendChild(hpText);
+          pieceNode.appendChild(hpDiv);
+        }
+
         boardEl.appendChild(pieceNode);
       }
     }
