@@ -52,7 +52,7 @@ export function render(s: State): void {
           hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString();
         } else {
           const hpDiv2 = document.createElement('div');
-          hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
+          hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.07em black;`;
           const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
           hpDiv2.appendChild(hpText);
           el.appendChild(hpDiv2);
@@ -179,7 +179,7 @@ export function render(s: State): void {
         // Add health points div to newly created pieces
         if (p.healthPoints !== undefined) {
           const hpDiv = document.createElement('div');
-          hpDiv.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;`;
+          hpDiv.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.07em black;`;
           const hpText = document.createTextNode(p.healthPoints.toString());
           hpDiv.appendChild(hpText);
           pieceNode.appendChild(hpDiv);
