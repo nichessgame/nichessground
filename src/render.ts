@@ -10,6 +10,25 @@ type PieceName = string; // `$color $role`
 // ported from https://github.com/lichess-org/lichobile/blob/master/src/chessground/render.ts
 // in case of bugs, blame @veloce
 export function render(s: State): void {
+  const isMobile = window.innerWidth <= 768; // or use 640 / 700 / 800 — your choice
+  const hpStyleMobile = `
+    position: absolute;
+    margin: auto;
+    text-align: center;
+    top: 25%;
+    color: #ffd700;
+    text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.07em black;
+  `;
+  const hpStyleDesktop = `
+    position: absolute;
+    margin: auto;
+    text-align: center;
+    top: 25%;
+    color: #ffd700;
+    text-shadow: 1px 1px 1px #bda622, 1px 2px 0.1em black;
+  `;
+  const hpStyle = isMobile ? hpStyleMobile : hpStyleDesktop;
+
   const asWhite: boolean = whitePov(s),
     posToTranslate = posToTranslateFromBounds(s.dom.bounds()),
     boardEl: HTMLElement = s.dom.elements.board,
@@ -52,7 +71,7 @@ export function render(s: State): void {
           hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString();
         } else {
           const hpDiv2 = document.createElement('div');
-          hpDiv2.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.07em black;`;
+          hpDiv2.style.cssText = hpStyle;
           const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
           hpDiv2.appendChild(hpText);
           el.appendChild(hpDiv2);
@@ -179,7 +198,7 @@ export function render(s: State): void {
         // Add health points div to newly created pieces
         if (p.healthPoints !== undefined) {
           const hpDiv = document.createElement('div');
-          hpDiv.style.cssText = `position:absolute;margin: auto; text-align: center; top: 25%; color: #ffd700; text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.07em black;`;
+          hpDiv.style.cssText = hpStyle;
           const hpText = document.createTextNode(p.healthPoints.toString());
           hpDiv.appendChild(hpText);
           pieceNode.appendChild(hpDiv);
