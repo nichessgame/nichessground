@@ -25,7 +25,7 @@ export function render(s: State): void {
     text-align: center;
     top: 25%;
     color: #ffd700;
-    text-shadow: 0.04em 0.04em 0.04em #bda622, 0.04em 0.08em 0.1em black;
+    text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.08em black;
   `;
   const hpStyle = isMobile ? hpStyleMobile : hpStyleDesktop;
 
