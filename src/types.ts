@@ -11,6 +11,14 @@ export interface Piece {
   promoted?: boolean;
   healthPoints: number;
 }
+
+export type HealthTextTheme = 'strong' | 'gold';
+
+export interface HealthTextConfig {
+  visible?: boolean;
+  theme?: HealthTextTheme;
+}
+
 export interface Drop {
   role: Role;
   key: Key;

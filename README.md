@@ -2,6 +2,27 @@
 
 This project is a fork of [https://github.com/lichess-org/chessground](https://github.com/lichess-org/chessground).
 
+## Nichess Health Text
+
+Nichessground renders a health point label for each piece that has `healthPoints`.
+The label is controlled by `healthText` in the board config:
+
+```ts
+Chessground(element, {
+  healthText: {
+    visible: true,
+    theme: 'strong',
+  },
+});
+```
+
+Available themes are:
+
+- `strong` - the current default; brighter labels with a stronger warm outline.
+- `gold` - bright gold labels near the top-left corner with a subtle warm edge.
+
+`healthText` is part of state and can be updated with `api.set({ healthText: { theme: 'gold' } })`.
+
 # Old README
 
 # Chessground

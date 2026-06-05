@@ -10,25 +10,6 @@ type PieceName = string; // `$color $role`
 // ported from https://github.com/lichess-org/lichobile/blob/master/src/chessground/render.ts
 // in case of bugs, blame @veloce
 export function render(s: State): void {
-  const isMobile = window.innerWidth <= 768; // or use 640 / 700 / 800 — your choice
-  const hpStyleMobile = `
-    position: absolute;
-    margin: auto;
-    text-align: center;
-    top: 25%;
-    color: #ffd700;
-    text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.09em black;
-  `;
-  const hpStyleDesktop = `
-    position: absolute;
-    margin: auto;
-    text-align: center;
-    top: 25%;
-    color: #ffd700;
-    text-shadow: 0.03em 0.03em 0.03em #bda622, 0.03em 0.06em 0.1em black;
-  `;
-  const hpStyle = isMobile ? hpStyleMobile : hpStyleDesktop;
-
   const asWhite: boolean = whitePov(s),
     posToTranslate = posToTranslateFromBounds(s.dom.bounds()),
     boardEl: HTMLElement = s.dom.elements.board,
@@ -64,19 +45,7 @@ export function render(s: State): void {
     k = el.cgKey;
     if (isPieceNode(el)) {
       pieceAtKey = pieces.get(k);
-      // TODO: Do this elsewhere?
-      if (pieceAtKey) {
-        const hpDiv = el.firstChild;
-        if (hpDiv != null && hpDiv.firstChild) {
-          hpDiv.firstChild.nodeValue = pieceAtKey.healthPoints.toString();
-        } else {
-          const hpDiv2 = document.createElement('div');
-          hpDiv2.style.cssText = hpStyle;
-          const hpText = document.createTextNode(pieceAtKey.healthPoints.toString());
-          hpDiv2.appendChild(hpText);
-          el.appendChild(hpDiv2);
-        }
-      }
+      updateHealthPoints(el, pieceAtKey, s.healthText);
       anim = anims.get(k);
       fading = fadings.get(k);
       elPieceName = el.cgPiece;
@@ -163,6 +132,7 @@ export function render(s: State): void {
       if (pMvd) {
         // apply dom changes
         pMvd.cgKey = k;
+        updateHealthPoints(pMvd, p, s.healthText);
         if (pMvd.cgFading) {
           pMvd.classList.remove('fading');
           pMvd.cgFading = false;
@@ -195,14 +165,7 @@ export function render(s: State): void {
 
         if (s.addPieceZIndex) pieceNode.style.zIndex = posZIndex(pos, asWhite);
 
-        // Add health points div to newly created pieces
-        if (p.healthPoints !== undefined) {
-          const hpDiv = document.createElement('div');
-          hpDiv.style.cssText = hpStyle;
-          const hpText = document.createTextNode(p.healthPoints.toString());
-          hpDiv.appendChild(hpText);
-          pieceNode.appendChild(hpDiv);
-        }
+        updateHealthPoints(pieceNode, p, s.healthText);
 
         boardEl.appendChild(pieceNode);
       }
@@ -246,6 +209,97 @@ export function updateBounds(s: State): void {
 
 const isPieceNode = (el: cg.PieceNode | cg.SquareNode): el is cg.PieceNode => el.tagName === 'PIECE';
 const isSquareNode = (el: cg.PieceNode | cg.SquareNode): el is cg.SquareNode => el.tagName === 'SQUARE';
+
+const hpClass = 'cg-health-points';
+
+interface HealthTextThemeStyle {
+  left: string;
+  top: string;
+  color: string;
+  fontSize: string;
+  fontWeight: string;
+  textShadow: string;
+  textStroke: string;
+}
+
+const healthTextThemes: Record<cg.HealthTextTheme, HealthTextThemeStyle> = {
+  gold: {
+    left: '3%',
+    top: '4%',
+    color: '#ffd84a',
+    fontSize: '0.94em',
+    fontWeight: '900',
+    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.055em 0.035em rgba(80, 52, 0, 0.55)',
+    textStroke: '0.012em rgba(94, 61, 0, 0.5)',
+  },
+  strong: {
+    left: '3%',
+    top: '4%',
+    color: '#ffe66f',
+    fontSize: '0.94em',
+    fontWeight: '900',
+    textShadow:
+      '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
+    textStroke: '0.018em rgba(82, 54, 0, 0.65)',
+  },
+};
+
+const baseHealthTextStyle = `
+  position: absolute;
+  box-sizing: border-box;
+  display: block;
+  border: 0;
+  background: transparent;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  box-shadow: none;
+  pointer-events: none;
+`;
+
+function healthTextStyle(config: cg.HealthTextConfig): string {
+  const theme = healthTextThemes[config.theme ?? 'strong'] ?? healthTextThemes.strong;
+
+  return `
+    ${baseHealthTextStyle}
+    left: ${theme.left};
+    top: ${theme.top};
+    color: ${theme.color};
+    font-size: ${theme.fontSize};
+    font-weight: ${theme.fontWeight};
+    text-shadow: ${theme.textShadow};
+    -webkit-text-stroke: ${theme.textStroke};
+  `;
+}
+
+function updateHealthPoints(pieceNode: cg.PieceNode, piece: cg.Piece | undefined, config: cg.HealthTextConfig): void {
+  let hpDiv = pieceNode.firstElementChild as HTMLElement | null;
+
+  if (hpDiv && hpDiv.className !== hpClass && !isLegacyHealthText(hpDiv)) {
+    hpDiv = pieceNode.querySelector(`.${hpClass}`);
+  }
+
+  if (config.visible === false || !piece || piece.healthPoints === undefined) {
+    hpDiv?.remove();
+    return;
+  }
+
+  if (!hpDiv) {
+    hpDiv = document.createElement('div');
+    hpDiv.className = hpClass;
+    pieceNode.insertBefore(hpDiv, pieceNode.firstChild);
+  }
+
+  hpDiv.className = hpClass;
+  hpDiv.style.cssText = healthTextStyle(config);
+  hpDiv.textContent = piece.healthPoints.toString();
+}
+
+function isLegacyHealthText(el: HTMLElement): boolean {
+  return el.tagName === 'DIV' && /^\d+$/.test(el.textContent ?? '');
+}
 
 function removeNodes(s: State, nodes: HTMLElement[]): void {
   for (const node of nodes) s.dom.elements.board.removeChild(node);
