@@ -21,7 +21,7 @@ export interface HeadlessState {
   addPieceZIndex: boolean; // adds z-index values to pieces (for 3D)
   addDimensionsCssVarsTo?: HTMLElement; // add ---cg-width and ---cg-height CSS vars containing the board's dimensions to this element
   blockTouchScroll: boolean; // block scrolling via touch dragging on the board, e.g. for coordinate training
-  healthText: cg.HealthTextConfig; // controls health point labels rendered on pieces
+  healthAndAbilityPointsText: cg.HealthAndAbilityPointsTextConfig; // controls health and ability point text
   pieceKey: boolean; // add a data-key attribute to piece elements
   trustAllEvents?: boolean; // disable checking for human only input (e.isTrusted)
   highlight: {
@@ -124,9 +124,10 @@ export function defaults(): HeadlessState {
     disableContextMenu: false,
     addPieceZIndex: false,
     blockTouchScroll: false,
-    healthText: {
-      visible: true,
-      theme: 'strong',
+    healthAndAbilityPointsText: {
+      healthPointsVisible: true,
+      theme: 'standard',
+      abilityPointsVisible: false,
     },
     pieceKey: false,
     trustAllEvents: false,

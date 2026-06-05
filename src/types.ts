@@ -10,14 +10,19 @@ export interface Piece {
   color: Color;
   promoted?: boolean;
   healthPoints: number;
+  abilityPoints?: number;
 }
 
-export type HealthTextTheme = 'strong' | 'gold';
+export type PointsTextTheme = 'standard' | 'strong';
 
-export interface HealthTextConfig {
-  visible?: boolean;
-  theme?: HealthTextTheme;
+export interface HealthAndAbilityPointsTextConfig {
+  healthPointsVisible?: boolean;
+  abilityPointsVisible?: boolean;
+  theme?: PointsTextTheme;
 }
+
+export type HealthTextTheme = PointsTextTheme;
+export type HealthTextConfig = HealthAndAbilityPointsTextConfig & { visible?: boolean };
 
 export interface Drop {
   role: Role;

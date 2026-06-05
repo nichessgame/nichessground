@@ -19,7 +19,8 @@ export interface Config {
   addPieceZIndex?: boolean; // adds z-index values to pieces (for 3D)
   addDimensionsCssVarsTo?: HTMLElement; // add ---cg-width and ---cg-height CSS vars containing the board's dimensions to this element
   blockTouchScroll?: boolean; // block scrolling via touch dragging on the board, e.g. for coordinate training
-  healthText?: cg.HealthTextConfig; // controls the health point labels rendered on pieces
+  healthAndAbilityPointsText?: cg.HealthAndAbilityPointsTextConfig; // controls health and ability point text
+  healthText?: cg.HealthTextConfig; // deprecated alias for healthAndAbilityPointsText
   // pieceKey: boolean; // add a data-key attribute to piece elements
   trustAllEvents?: boolean; // disable checking for human only input (e.isTrusted)
   highlight?: {
@@ -106,6 +107,15 @@ export function configure(state: HeadlessState, config: Config): void {
   // don't merge destinations and autoShapes. Just override.
   if (config.movable?.dests) state.movable.dests = undefined;
   if (config.drawable?.autoShapes) state.drawable.autoShapes = [];
+  if (config.healthText) {
+    config.healthAndAbilityPointsText = {
+      ...config.healthText,
+      healthPointsVisible: config.healthText.healthPointsVisible ?? config.healthText.visible,
+      abilityPointsVisible: config.healthText.visible === false ? false : config.healthText.abilityPointsVisible,
+      ...config.healthAndAbilityPointsText,
+    };
+    delete config.healthText;
+  }
 
   deepMerge(state, config);
 

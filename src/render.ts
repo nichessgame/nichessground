@@ -45,7 +45,7 @@ export function render(s: State): void {
     k = el.cgKey;
     if (isPieceNode(el)) {
       pieceAtKey = pieces.get(k);
-      updateHealthPoints(el, pieceAtKey, s.healthText);
+      updatePieceText(el, pieceAtKey, s.healthAndAbilityPointsText);
       anim = anims.get(k);
       fading = fadings.get(k);
       elPieceName = el.cgPiece;
@@ -132,7 +132,7 @@ export function render(s: State): void {
       if (pMvd) {
         // apply dom changes
         pMvd.cgKey = k;
-        updateHealthPoints(pMvd, p, s.healthText);
+        updatePieceText(pMvd, p, s.healthAndAbilityPointsText);
         if (pMvd.cgFading) {
           pMvd.classList.remove('fading');
           pMvd.cgFading = false;
@@ -165,7 +165,7 @@ export function render(s: State): void {
 
         if (s.addPieceZIndex) pieceNode.style.zIndex = posZIndex(pos, asWhite);
 
-        updateHealthPoints(pieceNode, p, s.healthText);
+        updatePieceText(pieceNode, p, s.healthAndAbilityPointsText);
 
         boardEl.appendChild(pieceNode);
       }
@@ -211,40 +211,47 @@ const isPieceNode = (el: cg.PieceNode | cg.SquareNode): el is cg.PieceNode => el
 const isSquareNode = (el: cg.PieceNode | cg.SquareNode): el is cg.SquareNode => el.tagName === 'SQUARE';
 
 const hpClass = 'cg-health-points';
+const apClass = 'cg-ability-points';
 
-interface HealthTextThemeStyle {
-  left: string;
-  top: string;
+interface PointsTextThemeStyle {
   color: string;
+  abilityColor: string;
   fontSize: string;
   fontWeight: string;
   textShadow: string;
+  abilityTextShadow: string;
   textStroke: string;
+  abilityTextStroke: string;
 }
 
-const healthTextThemes: Record<cg.HealthTextTheme, HealthTextThemeStyle> = {
-  gold: {
-    left: '3%',
-    top: '4%',
-    color: '#ffd84a',
-    fontSize: '0.94em',
-    fontWeight: '900',
-    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.055em 0.035em rgba(80, 52, 0, 0.55)',
-    textStroke: '0.012em rgba(94, 61, 0, 0.5)',
-  },
-  strong: {
-    left: '3%',
-    top: '4%',
+const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
+  standard: {
     color: '#ffe66f',
+    abilityColor: '#8fd8ff',
     fontSize: '0.94em',
     fontWeight: '900',
     textShadow:
       '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
+    abilityTextShadow:
+      '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
     textStroke: '0.018em rgba(82, 54, 0, 0.65)',
+    abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
+  },
+  strong: {
+    color: '#f2c94c',
+    abilityColor: '#65bff0',
+    fontSize: '0.94em',
+    fontWeight: '900',
+    textShadow:
+      '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
+    abilityTextShadow:
+      '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
+    textStroke: '0.024em rgba(70, 45, 0, 0.78)',
+    abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
   },
 };
 
-const baseHealthTextStyle = `
+const basePointsTextStyle = `
   position: absolute;
   box-sizing: border-box;
   display: block;
@@ -259,46 +266,74 @@ const baseHealthTextStyle = `
   pointer-events: none;
 `;
 
-function healthTextStyle(config: cg.HealthTextConfig): string {
-  const theme = healthTextThemes[config.theme ?? 'strong'] ?? healthTextThemes.strong;
+type PieceTextKind = 'health' | 'ability';
+
+function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: PieceTextKind): string {
+  const theme = pointsTextThemes[config.theme ?? 'standard'] ?? pointsTextThemes.standard;
+  const isAbility = kind === 'ability';
 
   return `
-    ${baseHealthTextStyle}
-    left: ${theme.left};
-    top: ${theme.top};
-    color: ${theme.color};
+    ${basePointsTextStyle}
+    ${isAbility ? 'right: 3%; bottom: 4%;' : 'left: 3%; top: 4%;'}
+    color: ${isAbility ? theme.abilityColor : theme.color};
     font-size: ${theme.fontSize};
     font-weight: ${theme.fontWeight};
-    text-shadow: ${theme.textShadow};
-    -webkit-text-stroke: ${theme.textStroke};
+    text-shadow: ${isAbility ? theme.abilityTextShadow : theme.textShadow};
+    -webkit-text-stroke: ${isAbility ? theme.abilityTextStroke : theme.textStroke};
   `;
 }
 
-function updateHealthPoints(pieceNode: cg.PieceNode, piece: cg.Piece | undefined, config: cg.HealthTextConfig): void {
-  let hpDiv = pieceNode.firstElementChild as HTMLElement | null;
+function updatePieceText(
+  pieceNode: cg.PieceNode,
+  piece: cg.Piece | undefined,
+  config: cg.HealthAndAbilityPointsTextConfig,
+): void {
+  updatePointLabel(pieceNode, hpClass, piece?.healthPoints, config.healthPointsVisible !== false, config, 'health');
+  updatePointLabel(
+    pieceNode,
+    apClass,
+    piece?.abilityPoints,
+    config.abilityPointsVisible === true,
+    config,
+    'ability',
+  );
+}
 
-  if (hpDiv && hpDiv.className !== hpClass && !isLegacyHealthText(hpDiv)) {
-    hpDiv = pieceNode.querySelector(`.${hpClass}`);
+function updatePointLabel(
+  pieceNode: cg.PieceNode,
+  className: string,
+  points: number | undefined,
+  visible: boolean,
+  config: cg.HealthAndAbilityPointsTextConfig,
+  kind: PieceTextKind,
+): void {
+  let pointDiv: HTMLElement | undefined;
+
+  for (const child of Array.from(pieceNode.children)) {
+    if (!(child instanceof HTMLElement)) continue;
+    if (child.className !== className && !isLegacyHealthText(child, className)) continue;
+    if (pointDiv) child.remove();
+    else pointDiv = child;
   }
 
-  if (config.visible === false || !piece || piece.healthPoints === undefined) {
-    hpDiv?.remove();
+  if (!visible || points === undefined) {
+    pointDiv?.remove();
     return;
   }
 
-  if (!hpDiv) {
-    hpDiv = document.createElement('div');
-    hpDiv.className = hpClass;
-    pieceNode.insertBefore(hpDiv, pieceNode.firstChild);
+  if (!pointDiv) {
+    pointDiv = document.createElement('div');
+    pointDiv.className = className;
+    pieceNode.insertBefore(pointDiv, pieceNode.firstChild);
   }
 
-  hpDiv.className = hpClass;
-  hpDiv.style.cssText = healthTextStyle(config);
-  hpDiv.textContent = piece.healthPoints.toString();
+  pointDiv.className = className;
+  pointDiv.style.cssText = pieceTextStyle(config, kind);
+  pointDiv.textContent = points.toString();
 }
 
-function isLegacyHealthText(el: HTMLElement): boolean {
-  return el.tagName === 'DIV' && /^\d+$/.test(el.textContent ?? '');
+function isLegacyHealthText(el: HTMLElement, className: string): boolean {
+  return className === hpClass && el.tagName === 'DIV' && /^\d+$/.test(el.textContent ?? '');
 }
 
 function removeNodes(s: State, nodes: HTMLElement[]): void {
