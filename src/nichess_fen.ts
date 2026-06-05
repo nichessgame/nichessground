@@ -1,5 +1,26 @@
 import * as cg from './types.js';
 
+interface NichessPieceInfo {
+  role: cg.Role;
+  color: cg.Color;
+  abilityPoints: number;
+}
+
+const pieceInfo: Partial<Record<string, NichessPieceInfo>> = {
+  '0king': { role: 'king', color: 'white', abilityPoints: 60 },
+  '0pawn': { role: 'pawn', color: 'white', abilityPoints: 60 },
+  '0mage': { role: 'queen', color: 'white', abilityPoints: 30 },
+  '0assassin': { role: 'bishop', color: 'white', abilityPoints: 30 },
+  '0knight': { role: 'knight', color: 'white', abilityPoints: 60 },
+  '0warrior': { role: 'rook', color: 'white', abilityPoints: 30 },
+  '1king': { role: 'king', color: 'black', abilityPoints: 60 },
+  '1pawn': { role: 'pawn', color: 'black', abilityPoints: 60 },
+  '1mage': { role: 'queen', color: 'black', abilityPoints: 30 },
+  '1assassin': { role: 'bishop', color: 'black', abilityPoints: 30 },
+  '1knight': { role: 'knight', color: 'black', abilityPoints: 60 },
+  '1warrior': { role: 'rook', color: 'black', abilityPoints: 30 },
+};
+
 function squareIndexToCoordinates(squareIndex: number): [number, number] {
   const x = squareIndex - Math.floor(squareIndex / 8) * 8;
   const y = Math.floor(squareIndex / 8);
@@ -52,77 +73,13 @@ export function read(encodedBoard: string): cg.Pieces {
       const healthPoints = Number(ar2[2]);
       const pieceType: string = ar2[0] + ar2[1];
       const key: cg.Key = squareIndexToKey(boardIdx);
-      if (pieceType === '0king') {
+      const info = pieceInfo[pieceType];
+      if (info) {
         pieces.set(key, {
-          role: 'king',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '0pawn') {
-        pieces.set(key, {
-          role: 'pawn',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '0mage') {
-        pieces.set(key, {
-          role: 'queen',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '0assassin') {
-        pieces.set(key, {
-          role: 'bishop',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '0knight') {
-        pieces.set(key, {
-          role: 'knight',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '0warrior') {
-        pieces.set(key, {
-          role: 'rook',
-          color: 'white',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1king') {
-        pieces.set(key, {
-          role: 'king',
-          color: 'black',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1pawn') {
-        pieces.set(key, {
-          role: 'pawn',
-          color: 'black',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1mage') {
-        pieces.set(key, {
-          role: 'queen',
-          color: 'black',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1assassin') {
-        pieces.set(key, {
-          role: 'bishop',
-          color: 'black',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1knight') {
-        pieces.set(key, {
-          role: 'knight',
-          color: 'black',
-          healthPoints: healthPoints,
-        });
-      } else if (pieceType === '1warrior') {
-        pieces.set(key, {
-          role: 'rook',
-          color: 'black',
-          healthPoints: healthPoints,
+          role: info.role,
+          color: info.color,
+          healthPoints,
+          abilityPoints: info.abilityPoints,
         });
       }
     }

@@ -10,8 +10,9 @@ type PieceName = string; // `$color $role`
 // ported from https://github.com/lichess-org/lichobile/blob/master/src/chessground/render.ts
 // in case of bugs, blame @veloce
 export function render(s: State): void {
+  const bounds = s.dom.bounds();
   const asWhite: boolean = whitePov(s),
-    posToTranslate = posToTranslateFromBounds(s.dom.bounds()),
+    posToTranslate = posToTranslateFromBounds(bounds),
     boardEl: HTMLElement = s.dom.elements.board,
     pieces: cg.Pieces = s.pieces,
     curAnim: AnimCurrent | undefined = s.animation.current,
@@ -36,10 +37,7 @@ export function render(s: State): void {
 
   // walk over all board dom elements, apply animations and flag moved pieces
   el = boardEl.firstChild as cg.PieceNode | cg.SquareNode | undefined;
-  // TODO: Better way to do this?
-  const bounds = s.dom.elements.wrap.getBoundingClientRect();
-  const width = (Math.floor((bounds.width * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
-  boardEl.style.cssText += `font-size: ${Math.floor(width / 20)}px;`;
+  updateBoardFontSize(boardEl, bounds.width);
 
   while (el) {
     k = el.cgKey;
@@ -178,15 +176,13 @@ export function render(s: State): void {
 }
 
 export function renderResized(s: State): void {
+  const bounds = s.dom.bounds();
   const asWhite: boolean = whitePov(s),
-    posToTranslate = posToTranslateFromBounds(s.dom.bounds());
-  const bounds = s.dom.elements.wrap.getBoundingClientRect();
-  const width = (Math.floor((bounds.width * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
+    posToTranslate = posToTranslateFromBounds(bounds);
+  updateBoardFontSize(s.dom.elements.board, bounds.width);
   let el = s.dom.elements.board.firstChild as cg.PieceNode | cg.SquareNode | undefined;
   while (el) {
     if ((isPieceNode(el) && !el.cgAnimating) || isSquareNode(el)) {
-      // TODO: Better way to do this?
-      el.style.cssText += `font-size: ${Math.floor(width / 20)}px;`;
       translate(el, posToTranslate(key2pos(el.cgKey), asWhite));
     }
     el = el.nextSibling as cg.PieceNode | cg.SquareNode | undefined;
@@ -212,16 +208,17 @@ const isSquareNode = (el: cg.PieceNode | cg.SquareNode): el is cg.SquareNode => 
 
 const hpClass = 'cg-health-points';
 const apClass = 'cg-ability-points';
+const boardFontSizes = new WeakMap<HTMLElement, string>();
 
 interface PointsTextThemeStyle {
   color: string;
   abilityColor: string;
   fontSize: string;
   fontWeight: string;
-  textShadow: string;
-  abilityTextShadow: string;
-  textStroke: string;
-  abilityTextStroke: string;
+  textShadow?: string;
+  abilityTextShadow?: string;
+  textStroke?: string;
+  abilityTextStroke?: string;
 }
 
 const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
@@ -230,10 +227,8 @@ const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
     abilityColor: '#8fd8ff',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow:
-      '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
-    abilityTextShadow:
-      '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
+    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
+    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
     textStroke: '0.018em rgba(82, 54, 0, 0.65)',
     abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
   },
@@ -242,12 +237,18 @@ const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
     abilityColor: '#65bff0',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow:
-      '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
-    abilityTextShadow:
-      '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
+    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
+    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
     textStroke: '0.024em rgba(70, 45, 0, 0.78)',
     abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
+  },
+  simple: {
+    color: '#f2d34f',
+    abilityColor: '#72c7f2',
+    fontSize: '0.94em',
+    fontWeight: '850',
+    textStroke: '0.022em rgba(10, 12, 16, 0.95)',
+    abilityTextStroke: '0.022em rgba(10, 12, 16, 0.95)',
   },
 };
 
@@ -268,9 +269,41 @@ const basePointsTextStyle = `
 
 type PieceTextKind = 'health' | 'ability';
 
+interface PointLabelState {
+  el?: HTMLElement;
+  points?: number;
+  visible?: boolean;
+  styleKey?: string;
+}
+
+type PointLabelCache = Record<PieceTextKind, PointLabelState>;
+
+const pointLabelCaches = new WeakMap<cg.PieceNode, PointLabelCache>();
+const pieceTextStates = new WeakMap<cg.PieceNode, PieceTextState>();
+
+interface PieceTextState {
+  healthPoints?: number;
+  abilityPoints?: number;
+  healthVisible: boolean;
+  abilityVisible: boolean;
+  theme: cg.PointsTextTheme;
+}
+
+function updateBoardFontSize(boardEl: HTMLElement, boundsWidth: number): void {
+  const width = (Math.floor((boundsWidth * window.devicePixelRatio) / 8) * 8) / window.devicePixelRatio;
+  const fontSize = `${Math.floor(width / 20)}px`;
+
+  if (boardFontSizes.get(boardEl) !== fontSize) {
+    boardEl.style.fontSize = fontSize;
+    boardFontSizes.set(boardEl, fontSize);
+  }
+}
+
 function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: PieceTextKind): string {
-  const theme = pointsTextThemes[config.theme ?? 'standard'] ?? pointsTextThemes.standard;
+  const theme = pointsTextThemes[config.theme || 'standard'];
   const isAbility = kind === 'ability';
+  const textShadow = isAbility ? theme.abilityTextShadow : theme.textShadow;
+  const textStroke = isAbility ? theme.abilityTextStroke : theme.textStroke;
 
   return `
     ${basePointsTextStyle}
@@ -278,8 +311,8 @@ function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: Piece
     color: ${isAbility ? theme.abilityColor : theme.color};
     font-size: ${theme.fontSize};
     font-weight: ${theme.fontWeight};
-    text-shadow: ${isAbility ? theme.abilityTextShadow : theme.textShadow};
-    -webkit-text-stroke: ${isAbility ? theme.abilityTextStroke : theme.textStroke};
+    ${textShadow ? `text-shadow: ${textShadow};` : ''}
+    ${textStroke ? `-webkit-text-stroke: ${textStroke};` : ''}
   `;
 }
 
@@ -288,15 +321,49 @@ function updatePieceText(
   piece: cg.Piece | undefined,
   config: cg.HealthAndAbilityPointsTextConfig,
 ): void {
-  updatePointLabel(pieceNode, hpClass, piece?.healthPoints, config.healthPointsVisible !== false, config, 'health');
-  updatePointLabel(
-    pieceNode,
-    apClass,
-    piece?.abilityPoints,
-    config.abilityPointsVisible === true,
-    config,
-    'ability',
+  const nextState: PieceTextState = {
+    healthPoints: piece?.healthPoints,
+    abilityPoints: piece?.abilityPoints,
+    healthVisible: config.healthPointsVisible !== false,
+    abilityVisible: config.abilityPointsVisible === true,
+    theme: config.theme || 'standard',
+  };
+
+  if (
+    samePieceTextState(pieceTextStates.get(pieceNode), nextState) &&
+    hasCurrentPointLabels(pieceNode, nextState)
+  ) {
+    return;
+  }
+
+  pieceTextStates.set(pieceNode, nextState);
+  updatePointLabel(pieceNode, hpClass, nextState.healthPoints, nextState.healthVisible, config, 'health');
+  updatePointLabel(pieceNode, apClass, nextState.abilityPoints, nextState.abilityVisible, config, 'ability');
+}
+
+function samePieceTextState(prev: PieceTextState | undefined, next: PieceTextState): boolean {
+  return (
+    !!prev &&
+    prev.healthPoints === next.healthPoints &&
+    prev.abilityPoints === next.abilityPoints &&
+    prev.healthVisible === next.healthVisible &&
+    prev.abilityVisible === next.abilityVisible &&
+    prev.theme === next.theme
   );
+}
+
+function hasCurrentPointLabels(pieceNode: cg.PieceNode, state: PieceTextState): boolean {
+  if (state.healthVisible && state.healthPoints !== undefined && !hasPointLabel(pieceNode, hpClass))
+    return false;
+  if (state.abilityVisible && state.abilityPoints !== undefined && !hasPointLabel(pieceNode, apClass))
+    return false;
+  return true;
+}
+
+function hasPointLabel(pieceNode: cg.PieceNode, className: string): boolean {
+  const cache = pointLabelCaches.get(pieceNode);
+  const label = className === hpClass ? cache?.health.el : cache?.ability.el;
+  return label?.parentElement === pieceNode;
 }
 
 function updatePointLabel(
@@ -307,33 +374,75 @@ function updatePointLabel(
   config: cg.HealthAndAbilityPointsTextConfig,
   kind: PieceTextKind,
 ): void {
-  let pointDiv: HTMLElement | undefined;
-
-  for (const child of Array.from(pieceNode.children)) {
-    if (!(child instanceof HTMLElement)) continue;
-    if (child.className !== className && !isLegacyHealthText(child, className)) continue;
-    if (pointDiv) child.remove();
-    else pointDiv = child;
-  }
+  const state = getPointLabelState(pieceNode, className, kind);
 
   if (!visible || points === undefined) {
-    pointDiv?.remove();
+    if (state.visible || state.el) state.el?.remove();
+    state.el = undefined;
+    state.points = undefined;
+    state.visible = false;
+    state.styleKey = undefined;
     return;
   }
 
-  if (!pointDiv) {
-    pointDiv = document.createElement('div');
-    pointDiv.className = className;
-    pieceNode.insertBefore(pointDiv, pieceNode.firstChild);
+  if (!state.el) {
+    state.el = document.createElement('div');
+    state.el.className = className;
+    pieceNode.insertBefore(state.el, pieceNode.firstChild);
   }
 
-  pointDiv.className = className;
-  pointDiv.style.cssText = pieceTextStyle(config, kind);
-  pointDiv.textContent = points.toString();
+  const styleKey = `${config.theme || 'standard'}:${kind}`;
+  if (!state.visible || state.styleKey !== styleKey || state.el.className !== className) {
+    state.el.className = className;
+    state.el.style.cssText = pieceTextStyle(config, kind);
+    state.styleKey = styleKey;
+  }
+  if (!state.visible || state.points !== points) {
+    state.el.textContent = points.toString();
+    state.points = points;
+  }
+  state.visible = true;
+}
+
+function getPointLabelState(
+  pieceNode: cg.PieceNode,
+  className: string,
+  kind: PieceTextKind,
+): PointLabelState {
+  let cache = pointLabelCaches.get(pieceNode);
+  if (!cache) {
+    cache = { health: {}, ability: {} };
+    pointLabelCaches.set(pieceNode, cache);
+  }
+  const state = cache[kind];
+  if (state.el?.parentElement === pieceNode) return state;
+
+  state.el = findPointLabel(pieceNode, className);
+  state.points = undefined;
+  state.visible = !!state.el;
+  state.styleKey = undefined;
+  return state;
+}
+
+function findPointLabel(pieceNode: cg.PieceNode, className: string): HTMLElement | undefined {
+  let label: HTMLElement | undefined;
+  let child = pieceNode.firstElementChild;
+  while (child) {
+    const next = child.nextElementSibling;
+    if (
+      child instanceof HTMLElement &&
+      (child.className === className || isLegacyHealthText(child, className))
+    ) {
+      if (label) child.remove();
+      else label = child;
+    }
+    child = next;
+  }
+  return label;
 }
 
 function isLegacyHealthText(el: HTMLElement, className: string): boolean {
-  return className === hpClass && el.tagName === 'DIV' && /^\d+$/.test(el.textContent ?? '');
+  return className === hpClass && el.tagName === 'DIV' && /^\d+$/.test(el.textContent);
 }
 
 function removeNodes(s: State, nodes: HTMLElement[]): void {
