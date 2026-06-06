@@ -222,7 +222,7 @@ interface PointsTextThemeStyle {
 }
 
 const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
-  standard: {
+  'light-gold-1': {
     color: '#ffe66f',
     abilityColor: '#8fd8ff',
     fontSize: '0.94em',
@@ -232,7 +232,27 @@ const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
     textStroke: '0.018em rgba(82, 54, 0, 0.65)',
     abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
   },
-  strong: {
+  'light-gold-2': {
+    color: '#ffe66f',
+    abilityColor: '#8fd8ff',
+    fontSize: '0.94em',
+    fontWeight: '900',
+    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
+    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
+    textStroke: '0.024em rgba(70, 45, 0, 0.78)',
+    abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
+  },
+  'dark-gold-1': {
+    color: '#f2c94c',
+    abilityColor: '#65bff0',
+    fontSize: '0.94em',
+    fontWeight: '900',
+    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
+    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
+    textStroke: '0.018em rgba(82, 54, 0, 0.65)',
+    abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
+  },
+  'dark-gold-2': {
     color: '#f2c94c',
     abilityColor: '#65bff0',
     fontSize: '0.94em',
@@ -241,14 +261,6 @@ const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
     abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
     textStroke: '0.024em rgba(70, 45, 0, 0.78)',
     abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
-  },
-  simple: {
-    color: '#f2d34f',
-    abilityColor: '#72c7f2',
-    fontSize: '0.94em',
-    fontWeight: '850',
-    textStroke: '0.022em rgba(10, 12, 16, 0.95)',
-    abilityTextStroke: '0.022em rgba(10, 12, 16, 0.95)',
   },
 };
 
@@ -300,7 +312,7 @@ function updateBoardFontSize(boardEl: HTMLElement, boundsWidth: number): void {
 }
 
 function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: PieceTextKind): string {
-  const theme = pointsTextThemes[config.theme || 'standard'];
+  const theme = pointsTextThemes[config.theme || 'light-gold-2'];
   const isAbility = kind === 'ability';
   const textShadow = isAbility ? theme.abilityTextShadow : theme.textShadow;
   const textStroke = isAbility ? theme.abilityTextStroke : theme.textStroke;
@@ -326,7 +338,7 @@ function updatePieceText(
     abilityPoints: piece?.abilityPoints,
     healthVisible: config.healthPointsVisible !== false,
     abilityVisible: config.abilityPointsVisible === true,
-    theme: config.theme || 'standard',
+    theme: config.theme || 'light-gold-2',
   };
 
   if (
@@ -391,7 +403,7 @@ function updatePointLabel(
     pieceNode.insertBefore(state.el, pieceNode.firstChild);
   }
 
-  const styleKey = `${config.theme || 'standard'}:${kind}`;
+  const styleKey = `${config.theme || 'light-gold-2'}:${kind}`;
   if (!state.visible || state.styleKey !== styleKey || state.el.className !== className) {
     state.el.className = className;
     state.el.style.cssText = pieceTextStyle(config, kind);

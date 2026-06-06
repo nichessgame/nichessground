@@ -13,7 +13,11 @@ export interface Piece {
   abilityPoints?: number;
 }
 
-export type PointsTextTheme = 'standard' | 'strong' | 'simple';
+export type PointsTextTheme =
+  | 'light-gold-1'
+  | 'light-gold-2'
+  | 'dark-gold-1'
+  | 'dark-gold-2';
 
 export interface HealthAndAbilityPointsTextConfig {
   healthPointsVisible?: boolean;

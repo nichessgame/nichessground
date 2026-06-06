@@ -126,7 +126,7 @@ export function defaults(): HeadlessState {
     blockTouchScroll: false,
     healthAndAbilityPointsText: {
       healthPointsVisible: true,
-      theme: 'standard',
+      theme: 'light-gold-2',
       abilityPointsVisible: false,
     },
     pieceKey: false,

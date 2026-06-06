@@ -30,7 +30,7 @@ The labels are controlled by `healthAndAbilityPointsText` in the board config:
 Chessground(element, {
   healthAndAbilityPointsText: {
     healthPointsVisible: true,
-    theme: 'standard',
+    theme: 'light-gold-2',
     abilityPointsVisible: true,
   },
 });
@@ -38,14 +38,16 @@ Chessground(element, {
 
 Available themes are:
 
-- `standard` - the default; bright labels with a warm outline.
-- `strong` - darker labels with a stronger outline.
+- `light-gold-1` - bright gold labels with a warm outline.
+- `light-gold-2` - the default; bright gold labels with a darker outline.
+- `dark-gold-1` - darker gold labels with a warm outline.
+- `dark-gold-2` - darker gold labels with a darker outline.
 
 Health points render in the upper-left corner. Ability points render in the bottom-right corner when
 `abilityPointsVisible` is `true`, using a light-blue variant of the selected theme.
 
 `healthAndAbilityPointsText` is part of state and can be updated with
-`api.set({ healthAndAbilityPointsText: { theme: 'strong' } })`.
+`api.set({ healthAndAbilityPointsText: { theme: 'dark-gold-2' } })`.
 
 # Old README
 
