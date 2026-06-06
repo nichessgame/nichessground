@@ -1,4 +1,12 @@
 import * as cg from './types.js';
+import {
+  ASSASSIN_ABILITY_POINTS,
+  KING_ABILITY_POINTS,
+  KNIGHT_ABILITY_POINTS,
+  MAGE_ABILITY_POINTS,
+  PAWN_ABILITY_POINTS,
+  WARRIOR_ABILITY_POINTS,
+} from 'nichess';
 
 interface NichessPieceInfo {
   role: cg.Role;
@@ -7,18 +15,18 @@ interface NichessPieceInfo {
 }
 
 const pieceInfo: Partial<Record<string, NichessPieceInfo>> = {
-  '0king': { role: 'king', color: 'white', abilityPoints: 60 },
-  '0pawn': { role: 'pawn', color: 'white', abilityPoints: 60 },
-  '0mage': { role: 'queen', color: 'white', abilityPoints: 30 },
-  '0assassin': { role: 'bishop', color: 'white', abilityPoints: 30 },
-  '0knight': { role: 'knight', color: 'white', abilityPoints: 60 },
-  '0warrior': { role: 'rook', color: 'white', abilityPoints: 30 },
-  '1king': { role: 'king', color: 'black', abilityPoints: 60 },
-  '1pawn': { role: 'pawn', color: 'black', abilityPoints: 60 },
-  '1mage': { role: 'queen', color: 'black', abilityPoints: 30 },
-  '1assassin': { role: 'bishop', color: 'black', abilityPoints: 30 },
-  '1knight': { role: 'knight', color: 'black', abilityPoints: 60 },
-  '1warrior': { role: 'rook', color: 'black', abilityPoints: 30 },
+  '0king': { role: 'king', color: 'white', abilityPoints: KING_ABILITY_POINTS },
+  '0pawn': { role: 'pawn', color: 'white', abilityPoints: PAWN_ABILITY_POINTS },
+  '0mage': { role: 'queen', color: 'white', abilityPoints: MAGE_ABILITY_POINTS },
+  '0assassin': { role: 'bishop', color: 'white', abilityPoints: ASSASSIN_ABILITY_POINTS },
+  '0knight': { role: 'knight', color: 'white', abilityPoints: KNIGHT_ABILITY_POINTS },
+  '0warrior': { role: 'rook', color: 'white', abilityPoints: WARRIOR_ABILITY_POINTS },
+  '1king': { role: 'king', color: 'black', abilityPoints: KING_ABILITY_POINTS },
+  '1pawn': { role: 'pawn', color: 'black', abilityPoints: PAWN_ABILITY_POINTS },
+  '1mage': { role: 'queen', color: 'black', abilityPoints: MAGE_ABILITY_POINTS },
+  '1assassin': { role: 'bishop', color: 'black', abilityPoints: ASSASSIN_ABILITY_POINTS },
+  '1knight': { role: 'knight', color: 'black', abilityPoints: KNIGHT_ABILITY_POINTS },
+  '1warrior': { role: 'rook', color: 'black', abilityPoints: WARRIOR_ABILITY_POINTS },
 };
 
 function squareIndexToCoordinates(squareIndex: number): [number, number] {

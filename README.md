@@ -2,6 +2,25 @@
 
 This project is a fork of [https://github.com/lichess-org/chessground](https://github.com/lichess-org/chessground).
 
+## Installation
+
+1. Clone and compile [nichess-ts](https://github.com/nichessgame/nichess-ts).
+
+2. Install dependencies:
+
+```sh
+npm install
+npm install path-to-nichess-ts/dist
+```
+
+Make sure to include the `dist` part when installing nichess-ts.
+
+3. Build:
+
+```sh
+npm run dist
+```
+
 ## Nichess Health And Ability Points Text
 
 Nichessground can render health points and ability points for each piece.
