@@ -215,10 +215,10 @@ interface PointsTextThemeStyle {
   abilityColor: string;
   fontSize: string;
   fontWeight: string;
-  textShadow?: string;
-  abilityTextShadow?: string;
-  textStroke?: string;
-  abilityTextStroke?: string;
+  textOutline: string;
+  abilityTextOutline: string;
+  textDepth?: string;
+  abilityTextDepth?: string;
 }
 
 const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
@@ -227,42 +227,51 @@ const pointsTextThemes: Record<cg.PointsTextTheme, PointsTextThemeStyle> = {
     abilityColor: '#8fd8ff',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
-    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
-    textStroke: '0.018em rgba(82, 54, 0, 0.65)',
-    abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
+    textOutline: pointsTextOutline('rgba(82, 54, 0, 0.66)', '0.026em'),
+    abilityTextOutline: pointsTextOutline('rgba(0, 58, 96, 0.62)', '0.026em'),
+    textDepth: '0 0.045em 0.035em rgba(82, 54, 0, 0.62)',
+    abilityTextDepth: '0 0.045em 0.035em rgba(0, 48, 80, 0.6)',
   },
   'light-gold-2': {
     color: '#ffe66f',
     abilityColor: '#8fd8ff',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
-    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
-    textStroke: '0.024em rgba(70, 45, 0, 0.78)',
-    abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
+    textOutline: pointsTextOutline('rgba(70, 45, 0, 0.76)', '0.032em'),
+    abilityTextOutline: pointsTextOutline('rgba(0, 48, 82, 0.72)', '0.032em'),
+    textDepth: '0 0.052em 0.038em rgba(65, 42, 0, 0.68)',
+    abilityTextDepth: '0 0.052em 0.038em rgba(0, 38, 66, 0.68)',
   },
   'dark-gold-1': {
     color: '#f2c94c',
     abilityColor: '#65bff0',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.65), 0 0.06em 0.045em rgba(82, 54, 0, 0.75)',
-    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.62), 0 0.06em 0.045em rgba(0, 48, 80, 0.72)',
-    textStroke: '0.018em rgba(82, 54, 0, 0.65)',
-    abilityTextStroke: '0.018em rgba(0, 58, 96, 0.62)',
+    textOutline: pointsTextOutline('rgba(82, 54, 0, 0.66)', '0.026em'),
+    abilityTextOutline: pointsTextOutline('rgba(0, 58, 96, 0.62)', '0.026em'),
+    textDepth: '0 0.045em 0.035em rgba(82, 54, 0, 0.62)',
+    abilityTextDepth: '0 0.045em 0.035em rgba(0, 48, 80, 0.6)',
   },
   'dark-gold-2': {
     color: '#f2c94c',
     abilityColor: '#65bff0',
     fontSize: '0.94em',
     fontWeight: '900',
-    textShadow: '0 0.025em 0 rgba(255, 255, 255, 0.55), 0 0.07em 0.052em rgba(65, 42, 0, 0.82)',
-    abilityTextShadow: '0 0.025em 0 rgba(255, 255, 255, 0.5), 0 0.07em 0.052em rgba(0, 38, 66, 0.82)',
-    textStroke: '0.024em rgba(70, 45, 0, 0.78)',
-    abilityTextStroke: '0.024em rgba(0, 48, 82, 0.76)',
+    textOutline: pointsTextOutline('rgba(70, 45, 0, 0.76)', '0.032em'),
+    abilityTextOutline: pointsTextOutline('rgba(0, 48, 82, 0.72)', '0.032em'),
+    textDepth: '0 0.052em 0.038em rgba(65, 42, 0, 0.68)',
+    abilityTextDepth: '0 0.052em 0.038em rgba(0, 38, 66, 0.68)',
   },
 };
+
+function pointsTextOutline(color: string, size: string): string {
+  return [
+    `0 -${size} 0 ${color}`,
+    `-${size} 0 0 ${color}`,
+    `${size} 0 0 ${color}`,
+    `0 ${size} 0 ${color}`,
+  ].join(', ');
+}
 
 const basePointsTextStyle = `
   position: absolute;
@@ -314,8 +323,9 @@ function updateBoardFontSize(boardEl: HTMLElement, boundsWidth: number): void {
 function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: PieceTextKind): string {
   const theme = pointsTextThemes[config.theme || 'light-gold-2'];
   const isAbility = kind === 'ability';
-  const textShadow = isAbility ? theme.abilityTextShadow : theme.textShadow;
-  const textStroke = isAbility ? theme.abilityTextStroke : theme.textStroke;
+  const textOutline = isAbility ? theme.abilityTextOutline : theme.textOutline;
+  const textDepth = isAbility ? theme.abilityTextDepth : theme.textDepth;
+  const textShadow = textDepth ? `${textOutline}, ${textDepth}` : textOutline;
 
   return `
     ${basePointsTextStyle}
@@ -323,8 +333,8 @@ function pieceTextStyle(config: cg.HealthAndAbilityPointsTextConfig, kind: Piece
     color: ${isAbility ? theme.abilityColor : theme.color};
     font-size: ${theme.fontSize};
     font-weight: ${theme.fontWeight};
-    ${textShadow ? `text-shadow: ${textShadow};` : ''}
-    ${textStroke ? `-webkit-text-stroke: ${textStroke};` : ''}
+    text-shadow: ${textShadow};
+    -webkit-font-smoothing: antialiased;
   `;
 }
 
